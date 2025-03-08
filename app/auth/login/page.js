@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 
 export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "" });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,70 +20,58 @@ export default function Login() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-gray-950 text-white">
-      {/* Background Effect - Positioned Behind */}
-      <div className="absolute inset-0 z-0">
-        <BackgroundBeams />
-      </div>
+      {/* Background Effect */}
+      <BackgroundBeams className="absolute inset-0 -z-10" />
 
-      {/* Login Form - Positioned Above the Background */}
-      <div className="relative z-10">
-        <Card className="w-full max-w-lg p-11 bg-white shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-3xl text-center">Login</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit}>
+      {/* Login Form */}
+      <Card className="w-full max-w-lg p-8 bg-white text-gray-900 shadow-2xl">
+        <CardHeader>
+          <CardTitle className="text-3xl text-center">Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
-                <label className="block text-sm font-medium">Name</label>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium">Email</label>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium">Password</label>
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-4 text-right">
-                <Link href="/auth/forgot-password" className="text-blue-400 text-sm hover:underline">
-                  Forgot Password?
-                </Link>
-              </div>
-              <Button type="submit" className="w-full bg-blue-600 py-2 text-lg">
-                Login
-              </Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-gray-400">
-              Don't have an account?{" "}
-              <Link href="/auth/signup" className="text-blue-400 hover:underline">
-                Sign Up
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+              <label className="block text-sm font-medium">Username</label>
+              <Input
+                type="text"
+                name="username"
+                placeholder="Enter your username"
+                value={form.username}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Password</label>
+              <Input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 text-white py-2 text-lg">
+              Login
+            </Button>
+          </form>
+
+          {/* Sign in with GitHub */}
+          <div className="mt-4 text-center">
+            <Button className="w-full bg-gray-800 text-white py-2 text-lg">
+              Sign in with Google
+            </Button>
+          </div>
+
+          <p className="mt-4 text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link href="/auth/signup" className="text-blue-600 hover:underline">
+              Sign Up
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

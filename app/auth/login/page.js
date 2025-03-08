@@ -6,16 +6,46 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 
+import { auth, provider, signInWithPopup, signInWithEmailAndPassword, db } from "@/firebaseConfig";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+
 export default function Login() {
+
+  async function googleLogin() {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        console.log("User already exists in the database.");
+      } else {
+        await setDoc(doc(db, "users", user.uid), {
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        });
+        console.log("User added to the database.");
+      }
+    } catch (error) {
+      console.log("Error signing in with Google:", error);
+    }
+  }
+
   const [form, setForm] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Form Submitted:", form);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password);
+      console.log("Login successful:", userCredential.user);
+    } catch (error) {
+      console.error("Error logging in:", error);
+    }
   };
 
   return (

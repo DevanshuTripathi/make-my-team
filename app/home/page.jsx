@@ -4,7 +4,7 @@ import { db } from "@/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { useState } from "react";
 
-export default function Home(){
+export default function Page(){
     const[teams, setTeams] = useState([]);
 
     const getTeams = async() => {

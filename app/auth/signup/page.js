@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { color } from "framer-motion";
 
+import { auth, createUserWithEmailAndPassword, db } from "@/firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+
 export default function Signup() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
@@ -14,9 +17,19 @@ export default function Signup() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", form);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+      const user = userCredential.user;
+      await setDoc(doc(db, "users", user.uid), {
+        name: form.name,
+        email: form.email,
+      });
+      console.log("Signup successful:", user);
+    } catch (error) {
+      console.error("Error signing up:", error);
+    }
   };
 
   return (

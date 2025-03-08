@@ -10,11 +10,11 @@ export default function Home() {
         <h1 className="relative z-10 text-3xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 font-sans font-bold">
           Find Your Team
         </h1>
-        <p className="text-neutral-400 text-lg md:text-xl my-4">
+        <p className="text-neutral-400 text-lg md:text-xl z-10 relative my-4">
           Welcome to <strong className="text-white">CrewConnect</strong>, the best platform for finding teammates.
         </p>
-        <Link href="/auth/signup">
-          <button  className="bg-white text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition">
+        <Link className="z-10 relative" href="/auth/login">
+          <button  className="bg-white text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:cursor-pointer hover:shadow-lg transition">
             Get Started
           </button>
         </Link>

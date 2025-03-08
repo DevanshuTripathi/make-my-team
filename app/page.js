@@ -1,21 +1,26 @@
 "use client";
 import React from "react";
-import { BackgroundLines } from "@/components/ui/background-lines";
 import { BackgroundBeams } from "@/components/ui/background-beams";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="h-screen w-full bg-neutral-950 relative flex flex-col items-center justify-center antialiased">
-      <div className="max-w-2xl mx-auto p-4">
-        <h1 className="relative z-10 text-lg md:text-7xl  bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600  text-center font-sans font-bold">
-          Find your Team
+      <div className="max-w-2xl mx-auto p-4 text-center">
+        <h1 className="relative z-10 text-3xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600 font-sans font-bold">
+          Find Your Team
         </h1>
-        <p></p>
-        <p className="text-neutral-500 max-w-lg mx-auto my-2 text-xl text-center relative z-10">
-          Welcome to Team Me Up, the best platform for finding teamates.
+        <p className="text-neutral-400 text-lg md:text-xl my-4">
+          Welcome to <strong className="text-white">CrewConnect</strong>, the best platform for finding teammates.
         </p>
+        <Link href="/dashboard">
+          <button className="bg-white text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition">
+            Get Started
+          </button>
+        </Link>
       </div>
       <BackgroundBeams />
     </div>
   );
 }
+

@@ -13,8 +13,8 @@ export default function Home() {
         <p className="text-neutral-400 text-lg md:text-xl my-4">
           Welcome to <strong className="text-white">CrewConnect</strong>, the best platform for finding teammates.
         </p>
-        <Link href="/dashboard">
-          <button className="bg-white text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition">
+        <Link href="/auth/signup">
+          <button  className="bg-white text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition">
             Get Started
           </button>
         </Link>

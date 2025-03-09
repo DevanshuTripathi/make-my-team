@@ -43,7 +43,7 @@ export default function Signup() {
           <CardTitle className="text-3xl text-center font-bold text-gray-800">Register</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label className="block text-sm font-semibold text-gray-700">Name</label>
               <Input

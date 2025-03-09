@@ -14,7 +14,7 @@ export default function Home() {
           Welcome to <strong className="text-white">CrewConnect</strong>, the best platform for finding teammates.
         </p>
         <Link className="z-10 relative" href="/auth/login">
-          <button  className="bg-white text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:cursor-pointer hover:shadow-lg transition">
+          <button  className="bg-white relative z-10 text-black font-semibold py-3 px-6 rounded-lg shadow-md hover:cursor-pointer hover:shadow-lg transition">
             Get Started
           </button>
         </Link>

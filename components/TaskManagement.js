@@ -10,8 +10,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
-  getDoc,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,9 +33,14 @@ export default function TaskManagement() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
 
-  // ✅ Real-time Firestore listener
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  // ✅ Real-time Firestore listener for user-specific tasks
   useEffect(() => {
-    const tasksCollectionRef = collection(db, "dbs", "tasks", "tasks");
+    if (!user) return;
+
+    const tasksCollectionRef = collection(db, "tasks", user.uid, "tasks");
 
     const unsubscribe = onSnapshot(tasksCollectionRef, (snapshot) => {
       const taskData = { todo: [], inProgress: [], done: [] };
@@ -49,80 +54,73 @@ export default function TaskManagement() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // ✅ Handle Drag & Drop
   const onDragEnd = async (result) => {
-    if (!result.destination) return;
-  
+    if (!result.destination || !user) return;
+
     const { source, destination } = result;
     const sourceColumn = [...tasks[source.droppableId]];
     const destColumn = [...tasks[destination.droppableId]];
-  
+
     // Remove task from source column
     const [movedTask] = sourceColumn.splice(source.index, 1);
     movedTask.status = destination.droppableId;
-  
+
     // Add task to destination column
     destColumn.splice(destination.index, 0, movedTask);
-  
+
     // Update UI immediately
     setTasks((prev) => ({
       ...prev,
       [source.droppableId]: sourceColumn,
       [destination.droppableId]: destColumn,
     }));
-  
-    // Check if document exists before updating Firestore
-    const taskRef = doc(db, "dbs", "tasks", "tasks", movedTask.id);
-    const docSnap = await getDoc(taskRef);
-  
-    if (docSnap.exists()) {
+
+    // Update Firestore
+    try {
+      const taskRef = doc(db, "tasks", user.uid, "tasks", movedTask.id);
       await updateDoc(taskRef, { status: movedTask.status });
-    } else {
-      console.warn("Task not found in Firestore. Refreshing tasks...");
-      // Refresh tasks from Firestore to fix UI inconsistency
-      refreshTasksFromFirestore();
+    } catch (error) {
+      console.error("Error updating task status:", error);
     }
   };
-  
-  const refreshTasksFromFirestore = () => {
-    const tasksCollectionRef = collection(db, "dbs", "tasks", "tasks");
-  
-    onSnapshot(tasksCollectionRef, (snapshot) => {
-      const taskData = { todo: [], inProgress: [], done: [] };
-      snapshot.forEach((doc) => {
-        const task = { id: doc.id, ...doc.data() };
-        if (taskData[task.status]) {
-          taskData[task.status].push(task);
-        }
-      });
-      setTasks(taskData);
-    });
-  };
-  
 
   // ✅ Add a new task to Firestore
   const addTask = async () => {
+    if (!user) {
+      alert("You must be logged in to add a task.");
+      return;
+    }
+
     if (!taskTitle.trim()) {
       alert("Task title is required");
       return;
     }
 
-    await addDoc(collection(db, "dbs", "tasks", "tasks"), {
-      title: taskTitle,
-      description: taskDescription,
-      status: "todo",
-    });
+    try {
+      const tasksCollectionRef = collection(db, "tasks", user.uid, "tasks");
+      await addDoc(tasksCollectionRef, {
+        title: taskTitle,
+        description: taskDescription,
+        status: "todo",
+      });
 
-    setTaskTitle("");
-    setTaskDescription("");
+      setTaskTitle("");
+      setTaskDescription("");
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
   };
 
   // ✅ Delete task from Firestore
   const deleteTask = async (id) => {
+    if (!user) return;
+
     try {
-      await deleteDoc(doc(db, "dbs", "tasks", "tasks", id));
+      const taskRef = doc(db, "tasks", user.uid, "tasks", id);
+      await deleteDoc(taskRef);
       console.log("Task deleted successfully");
     } catch (error) {
       console.error("Error deleting task:", error);
@@ -139,20 +137,27 @@ export default function TaskManagement() {
 
   // ✅ Update Task in Firestore
   const updateTask = async () => {
+    if (!user) return;
+
     if (!taskTitle.trim()) {
       alert("Task title is required");
       return;
     }
 
-    await updateDoc(doc(db, "dbs", "tasks", "tasks", currentTask.id), {
-      title: taskTitle,
-      description: taskDescription,
-    });
+    try {
+      const taskRef = doc(db, "tasks", user.uid, "tasks", currentTask.id);
+      await updateDoc(taskRef, {
+        title: taskTitle,
+        description: taskDescription,
+      });
 
-    setTaskTitle("");
-    setTaskDescription("");
-    setIsEditing(false);
-    setCurrentTask(null);
+      setTaskTitle("");
+      setTaskDescription("");
+      setIsEditing(false);
+      setCurrentTask(null);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
   return (
@@ -217,6 +222,7 @@ export default function TaskManagement() {
                             </p>
                           </div>
                           <div className="flex gap-2">
+                            {/* Uncomment for Edit functionality */}
                             {/* <button
                               onClick={() => openEditModal(task)}
                               className="text-blue-500 text-sm"

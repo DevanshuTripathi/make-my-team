@@ -1,17 +1,63 @@
 "use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FaUsers, FaCalendarAlt, FaTasks, FaUserFriends } from "react-icons/fa";
-
-// Dummy Data (Replace with API data)
-const userData = {
-  name: "Mayank",  // Replace with dynamic user data
-  teamsJoined: 3,
-  upcomingMeetings: 2,
-  pendingTasks: 5,
-  newMatches: 4,
-};
+import { db, auth } from "@/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function OverviewPanel() {
+  const [userData, setUserData] = useState({
+    name: "",
+    teamsJoined: 0,
+    upcomingMeetings: 0,
+    pendingTasks: 0,
+    newMatches: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const currentUser = auth.currentUser;
+
+        if (!currentUser) {
+          console.error("No user is logged in.");
+          return;
+        }
+
+        // Fetch user data from Firestore
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+
+          // Update state with fetched data
+          setUserData({
+            name: data.name || "User",
+            teamsJoined: data.teamsJoined || 0,
+            upcomingMeetings: data.upcomingMeetings || 0,
+            pendingTasks: data.pendingTasks || 0,
+            newMatches: data.newMatches || 0,
+          });
+        } else {
+          console.error("User document not found.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="p-6">
       {/* Welcome Message */}

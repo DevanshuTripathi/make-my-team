@@ -113,7 +113,8 @@ export default function Sidebar({ onSelectSection }) {
         onClick={() => handleSelect("tasks")}
       >
         <FaTasks size={20} />
-        Tasks ({tasks.length})
+        Tasks 
+        {/* ({tasks.length}) */}
       </button>
 
       <button

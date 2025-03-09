@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // ✅ Import useRouter for redirection
+import { useRouter } from "next/navigation"; 
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const router = useRouter(); // ✅ Initialize useRouter
+  const router = useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,7 +24,6 @@ export default function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
       const user = userCredential.user;
 
-      // ✅ Store user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         name: form.name,
         email: form.email,
@@ -32,7 +31,6 @@ export default function Signup() {
 
       console.log("Signup successful:", user);
 
-      // ✅ Redirect to login page after successful signup
       router.push("/auth/login");
     } catch (error) {
       console.error("Error signing up:", error);

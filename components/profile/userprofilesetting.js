@@ -1,49 +1,191 @@
 "use client";
-import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
+
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+import { auth, db } from "@/firebaseConfig";
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+
+// Predefined options for skills and experience
+const skillOptions = [
+  "JavaScript",
+  "React",
+  "Python",
+  "SQL",
+  "Java",
+  "AWS",
+  "Data Analysis",
+  "Machine Learning",
+  "UI/UX Design",
+];
+
+const experienceOptions = [
+  "Beginner (0-1 years)",
+  "Intermediate (1-3 years)",
+  "Advanced (3-5 years)",
+  "Expert (5+ years)",
+];
 
 export default function UserProfileSettings() {
-  const { theme, setTheme } = useTheme();
   const [profile, setProfile] = useState({
     name: "",
     bio: "",
-    skills: "",
+    skills: [],
     interests: "",
+    experience: "",
+    location: "",
   });
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (auth?.currentUser) {
+        const docRef = doc(db, "dbs", "users");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const userData = docSnap.data()[auth.currentUser.uid];
+          if (userData) {
+            setProfile({
+              name: userData.name || "",
+              bio: userData.bio || "",
+              skills: userData.skills || [],
+              interests: Array.isArray(userData.interests) ? userData.interests.join(", ") : userData.interests || "",
+              experience: userData.experience || "",
+              location: userData.location || "",
+            });
+          }
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  return (
-    <div className="flex flex-col items-center p-8 gap-8">
-      {/* Profile Customization */}
-      <Card className="max-w-3xl w-full shadow-lg rounded-xl border border-gray-300 dark:border-gray-800">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl font-semibold">Profile Customization</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <Input name="name" placeholder="Enter your name" value={profile.name} onChange={handleChange} className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500" />
-          <Textarea name="bio" placeholder="Write a short bio..." value={profile.bio} onChange={handleChange} className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500" />
-          <Input name="skills" placeholder="Skills (e.g., JavaScript, Python)" value={profile.skills} onChange={handleChange} className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500" />
-          <Input name="interests" placeholder="Interests (e.g., AI, Web Dev)" value={profile.interests} onChange={handleChange} className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500" />
-          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg">Save Profile</Button>
-        </CardContent>
-      </Card>
+  const handleSkillChange = (e) => {
+    const selectedSkills = Array.from(e.target.selectedOptions).map((option) => option.value);
+    setProfile({ ...profile, skills: selectedSkills });
+  };
 
-      {/* Appearance Settings */}
-      <Card className="max-w-3xl w-full shadow-lg rounded-xl border border-gray-300 dark:border-gray-800">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl font-semibold">Appearance</CardTitle>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!auth.currentUser) {
+      alert("You must be logged in to update your profile.");
+      return;
+    }
+
+    try {
+      const usersDocRef = doc(db, "dbs", "users");
+
+      // Update or create the user's data inside the "users" document
+      await setDoc(
+        usersDocRef,
+        {
+          [auth.currentUser.uid]: {
+            name: profile.name,
+            bio: profile.bio,
+            skills: profile.skills,
+            interests: typeof profile.interests === "string" ? profile.interests.split(",").map((interest) => interest.trim().toLowerCase()) : [],
+            experience: profile.experience,
+            location: profile.location,
+          },
+        },
+        { merge: true }
+      );
+
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>User Profile Settings</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-between p-4">
-          <span className="text-lg">Dark Mode</span>
-          <Switch checked={theme === "dark"} onCheckedChange={() => setTheme(theme === "dark" ? "light" : "dark")} className="scale-125" />
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            {/* Name */}
+            <Input
+              name="name"
+              placeholder="Full Name"
+              value={profile.name}
+              onChange={handleChange}
+              required
+              className="mb-2"
+            />
+
+            {/* Bio */}
+            <Textarea
+              name="bio"
+              placeholder="Short Bio"
+              value={profile.bio}
+              onChange={handleChange}
+              className="mb-2"
+            />
+
+            {/* Skills Dropdown */}
+            <label className="block mb-1 font-medium">Skills</label>
+            <select
+              multiple
+              value={profile.skills}
+              onChange={handleSkillChange}
+              className="border p-2 rounded w-full mb-2"
+            >
+              {skillOptions.map((skill) => (
+                <option key={skill} value={skill}>
+                  {skill}
+                </option>
+              ))}
+            </select>
+
+            {/* Interests */}
+            <Input
+              name="interests"
+              placeholder="Interests (comma-separated)"
+              value={profile.interests}
+              onChange={handleChange}
+              className="mb-2"
+            />
+
+            {/* Experience Dropdown */}
+            <label className="block mb-1 font-medium">Experience</label>
+            <select
+              name="experience"
+              value={profile.experience}
+              onChange={handleChange}
+              className="border p-2 rounded w-full mb-2"
+            >
+              <option value="">Select Experience Level</option>
+              {experienceOptions.map((exp) => (
+                <option key={exp} value={exp}>
+                  {exp}
+                </option>
+              ))}
+            </select>
+
+            {/* Location */}
+            <Input
+              name="location"
+              placeholder="Location (City/Country)"
+              value={profile.location}
+              onChange={handleChange}
+              className="mb-4"
+            />
+
+            {/* Submit Button */}
+            <Button type="submit" className="mt-4 w-full">
+              Save Changes
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

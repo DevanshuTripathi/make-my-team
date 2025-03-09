@@ -4,7 +4,8 @@ import Sidebar from "@/components/sidebar";
 import DashboardContent from "@/components/dashboardcontent";
 import TeamsSection from "@/components/teamsection";
 import TaskManagement from "@/components/TaskManagement"; // Import
-import OverviewPanel from "@/components/overview";
+import UserProfileSettings from "@/components/profile/userprofilesetting";
+
 
 export default function Dashboard() {
   const [selectedSection, setSelectedSection] = useState("dashboard");
@@ -24,6 +25,7 @@ export default function Dashboard() {
        
         {selectedSection === "teams" && <TeamsSection />}
         {selectedSection === "tasks" && <TaskManagement />} {/* Show task manager */}
+        {selectedSection === "settings" && <UserProfileSettings />}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import OverviewPanel from "@/components/overview";
 export default function DashboardContent() {
   // Sample suggested teammates (Replace with real AI-driven data later)
   const suggestedTeammates = [
@@ -9,12 +10,13 @@ export default function DashboardContent() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       {/* Welcome Panel */}
-      <h2 className="text-2xl font-semibold mb-4">Welcome to Your Dashboard</h2>
-      <p className="text-gray-600">Here you can manage your profile, team, and more.</p>
+      <OverviewPanel/>
+
+     
 
       {/* AI-Powered Team Matchmaking */}
       <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4">AI-Powered Team Matchmaking</h3>
+        <h1 className="text-xl font-semibold mb-4">AI-Powered Team Matchmaking</h1>
         <p className="text-gray-600 mb-4">
           Based on your interests and skills, here are some suggested teammates:
         </p>

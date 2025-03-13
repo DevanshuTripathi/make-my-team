@@ -1,17 +1,63 @@
 "use client";
+import { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import {db} from "@/firebaseConfig";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FaUsers, FaCalendarAlt, FaTasks, FaUserFriends } from "react-icons/fa";
 
-// Dummy Data (Replace with API data)
-const userData = {
-  name: "Mayank",  // Replace with dynamic user data
-  teamsJoined: 3,
-  upcomingMeetings: 2,
-  pendingTasks: 5,
-  newMatches: 4,
-};
-
 export default function OverviewPanel() {
+  const [userData, setUserData] = useState({
+    name: "",
+    teamsJoined: 0,
+    upcomingMeetings: 0,
+    pendingTasks: 0,
+    newMatches: 0,
+  });
+
+  useEffect(() => {
+    const auth = getAuth();
+
+    // Listen for authentication state changes
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is signed in
+        const displayName = user.displayName || "User"; // Default to "User" if no name is provided
+        const uid = user.uid;
+
+        // Fetch additional user data from Firestore
+        try {
+          const userDocRef = doc(db, "users", uid); // Assuming each user's data is stored under their UID in Firestore
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const userDetails = userDocSnap.data();
+            setUserData({
+              name: displayName,
+              teamsJoined: userDetails.teamsJoined || 0,
+              upcomingMeetings: userDetails.upcomingMeetings || 0,
+              pendingTasks: userDetails.pendingTasks || 0,
+              newMatches: userDetails.newMatches || 0,
+            });
+          } else {
+            console.log("No such document in Firestore!");
+          }
+        } catch (error) {
+          console.error("Error fetching Firestore data:", error);
+        }
+      } else {
+        // User is signed out
+        setUserData({
+          name: "",
+          teamsJoined: 0,
+          upcomingMeetings: 0,
+          pendingTasks: 0,
+          newMatches: 0,
+        });
+      }
+    });
+  }, []);
+
   return (
     <div className="p-6">
       {/* Welcome Message */}

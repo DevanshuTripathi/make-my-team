@@ -1,20 +1,35 @@
+import { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import {db} from "@/firebaseConfig";
 import OverviewPanel from "@/components/overview";
+
 export default function DashboardContent() {
-  // Sample suggested teammates (Replace with real AI-driven data later)
-  const suggestedTeammates = [
-    { id: 1, name: "John Doe", skills: ["React", "Node.js"], matchScore: 87 },
-    { id: 2, name: "Jane Smith", skills: ["Python", "Machine Learning"], matchScore: 92 },
-    { id: 3, name: "Mike Johnson", skills: ["Django", "FastAPI"], matchScore: 80 },
-  ];
+  const [suggestedTeammates, setSuggestedTeammates] = useState([]);
+
+  useEffect(() => {
+    const fetchSuggestedTeammates = async () => {
+      try {
+        const userDocRef = doc(db, "dbs", "user");
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          setSuggestedTeammates(data.suggestedTeammates || []);
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching teammates:", error);
+      }
+    };
+
+    fetchSuggestedTeammates();
+  }, []);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      {/* Welcome Panel */}
-      <OverviewPanel/>
+      <OverviewPanel />
 
-     
-
-      {/* AI-Powered Team Matchmaking */}
       <div className="mt-8">
         <h1 className="text-xl font-semibold mb-4">AI-Powered Team Matchmaking</h1>
         <p className="text-gray-600 mb-4">
